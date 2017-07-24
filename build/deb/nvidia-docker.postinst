@@ -5,6 +5,7 @@ set -e
 NVIDIA_DOCKER_USER=#PACKAGE#
 NVIDIA_DOCKER_ROOT=/var/lib/nvidia-docker
 NVIDIA_DOCKER_PLUGIN=/usr/bin/nvidia-docker-plugin
+NVIDIA_DOCKER_DRIVER=/usr/local/nvidia-driver
 
 case "$1" in
     configure)
@@ -16,6 +17,11 @@ case "$1" in
         echo "Setting up permissions"
         chown "$NVIDIA_DOCKER_USER": "$NVIDIA_DOCKER_ROOT"
         setcap cap_fowner+pe "$NVIDIA_DOCKER_PLUGIN"
+        mkdir -p "$NVIDIA_DOCKER_DRIVER"
+        chown "$NVIDIA_DOCKER_USER": "$NVIDIA_DOCKER_DRIVER"
+        echo "Adding cuda driver to LD_LIBRARY_PATH"
+        tee /etc/ld.so.conf.d/nvidia-ml.conf <<< /cm/local/apps/cuda-driver/libs/375.66/lib64/
+        ldconfig
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
