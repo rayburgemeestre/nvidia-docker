@@ -248,8 +248,10 @@ func (v *Volume) Create(s FileCloneStrategy) (err error) {
 			}
 
 			l := path.Join(vpath, path.Base(f))
-			if err := s.Clone(f, l); err != nil {
-				return err
+			if _, err := os.Stat(l); os.IsNotExist(err) {
+				if err := s.Clone(f, l); err != nil {
+					return err
+				}
 			}
 			soname, err := obj.DynString(elf.DT_SONAME)
 			if err != nil {
